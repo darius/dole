@@ -34,6 +34,10 @@ function ctrl(ch)
    return string.char(ch:byte(1) - 64)
 end
 
+function meta(ch)
+   return '\27' .. ch
+end
+
 buffer = ''
 
 function redisplay()
