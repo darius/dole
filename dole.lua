@@ -4,17 +4,19 @@ local rows, cols = io.popen('stty size'):read():match('(%d+) (%d+)')
 screen_rows, screen_cols = 0+rows, 0+cols
 
 function main()
-   local settings = io.popen('stty -g'):read()
-   os.execute('stty raw -echo')
-   pcall(function ()
-            io.write(clear_screen)
-            reacting()
-         end)
-   os.execute('stty ' .. settings)
+   with_stty('raw -echo', reacting)
    io.write('\n')
 end
 
+function with_stty(args, thunk)
+   local settings = io.popen('stty -g'):read()
+   os.execute('stty ' .. args)
+   pcall(thunk)
+   os.execute('stty ' .. settings)
+end
+
 function reacting()
+   io.write(clear_screen)
    while true do
       redisplay()
       ch = read_key()
