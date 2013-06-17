@@ -1,4 +1,4 @@
-require('ansi_term')
+term = require('ansi_term')
 
 local rows, cols = io.popen('stty size'):read():match('(%d+) (%d+)')
 screen_rows, screen_cols = 0+rows, 0+cols
@@ -16,7 +16,7 @@ function with_stty(args, thunk)
 end
 
 function reacting()
-   io.write(clear_screen)
+   io.write(term.clear_screen)
    while true do
       redisplay()
       ch = read_key()
@@ -41,7 +41,7 @@ end
 buffer = ''
 
 function redisplay()
-   io.write(home)
+   io.write(term.home)
    local fixed = buffer:gsub('\n', '\r\n')
    io.write(fixed)
 end
