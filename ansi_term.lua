@@ -19,8 +19,14 @@ function ansi_term.goto(x, y)
    return prefix .. ('%d;%dH'):format(y+1, x+1)
 end
 
--- XXX
-black, red, green, yellow, blue, magenta, cyan, white = 0,1,2,3,4,5,6,7
+ansi_term.black   = 0
+ansi_term.red     = 1
+ansi_term.green   = 2
+ansi_term.yellow  = 3
+ansi_term.blue    = 4
+ansi_term.magenta = 5
+ansi_term.cyan    = 6
+ansi_term.white   = 7
 
 function ansi_term.bright(color)
    return 60 + color
