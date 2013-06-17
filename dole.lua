@@ -10,12 +10,37 @@ function main()
             reacting()
          end)
    os.execute('stty sane')
+   io.write('\n')
 end
 
 function reacting()
-   io.write('Welcome to dole\r\n')
-   io.write(io.read(1))
+   while true do
+      redisplay()
+      ch = read_key()
+      if ch == '' or ch == ctrl('q') then break end
+      if ch == '\r' then ch = '\n' end
+      insert(ch)
+   end
+end
+
+function read_key()
+   return io.read(1)
+end
+
+function ctrl(ch)
+   return ch -- XXX
+end
+
+buffer = ''
+
+function redisplay()
+   io.write(home)
+   local fixed = buffer:gsub('\n', '\r\n')
+   io.write(fixed)
+end
+
+function insert(ch)
+    buffer = buffer .. ch
 end
 
 main()
-io.write('\n')
