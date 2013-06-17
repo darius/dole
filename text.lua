@@ -139,7 +139,7 @@ function text_replace(t, p, span, replacement)
 
    -- Insert `replacement`:
    for i = 1, #replacement do
-      t[head+i] = replacement[i]
+      t[head+i] = replacement:byte(i)
    end
    t.head = head + #replacement
    t.length = length + #replacement
