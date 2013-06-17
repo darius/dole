@@ -17,7 +17,7 @@ function reacting()
    while true do
       redisplay()
       ch = read_key()
-      if ch == '' or ch == ctrl('q') then break end
+      if ch == '' or ch == ctrl('Q') then break end
       if ch == '\r' then ch = '\n' end
       insert(ch)
    end
@@ -28,7 +28,7 @@ function read_key()
 end
 
 function ctrl(ch)
-   return ch -- XXX
+   return string.char(ch:byte(1) - 64)
 end
 
 buffer = ''
