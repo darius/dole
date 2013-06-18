@@ -1,13 +1,28 @@
 local term = require('ansi_term')
 
+local function unwind_protect(thunk, on_unwind)
+   local ok, result = pcall(thunk)
+   on_unwind()
+   if ok then
+      return result
+   else
+      -- XXX *weird* without the following line it seems to fail silently
+      -- (that is, not show the error we just caught -- it seems the output
+      -- to stderr gets cleared away or the buffer isn't flushed or who knows). 
+      print('') 
+      error(result)
+   end
+end
+
 local rows, cols = io.popen('stty size'):read():match('(%d+) (%d+)')
 local screen_rows, screen_cols = 0+rows, 0+cols
 
 local function with_stty(args, thunk)
    local settings = io.popen('stty -g'):read()
    os.execute('stty ' .. args)
-   pcall(thunk)  -- XXX want to reraise any error, after stty
-   os.execute('stty ' .. settings)
+   unwind_protect(thunk, function()
+                     os.execute('stty ' .. settings)
+   end)
 end
 
 local function read_key()
