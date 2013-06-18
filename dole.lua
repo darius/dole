@@ -4,7 +4,7 @@ local function unwind_protect(thunk, on_unwind)
    local ok, result = pcall(thunk)
    on_unwind()
    if ok then
-      return result
+      return result -- N.B. this leaves out any extra results from thunk
    else
       -- XXX *weird* without the following line it seems to fail silently
       -- (that is, not show the error we just caught -- it seems the output
