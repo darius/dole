@@ -1,4 +1,5 @@
 local term = require('ansi_term')
+local text_module = require('text')  -- ugh to this name
 
 local function unwind_protect(thunk, on_unwind)
    local ok, result = pcall(thunk)
@@ -37,15 +38,15 @@ local function meta(ch)
    return '\27' .. ch
 end
 
-local buffer = ''
+local buffer = text_module.make()
 
 local function insert(ch)
-    buffer = buffer .. ch
+   buffer.replace(buffer.length(), 0, ch)
 end
 
 local function redisplay()
    io.write(term.home)
-   local fixed = buffer:gsub('\n', '\r\n')
+   local fixed = buffer.get(0, buffer.length()):gsub('\n', '\r\n')
    io.write(fixed)
 end
 
