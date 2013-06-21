@@ -32,11 +32,12 @@
 -- say 64 bytes, instead of single characters. Or does Lua have some
 -- byte-array type?
 
-nowhere = -1
+local nowhere = -1
 
-backward, forward = -1, 1
+local backward, forward = -1, 1
 
-function text_make() 
+-- Make a text object
+local function make() 
    local t = {}   -- The storage for the head, gap, and tail. TODO rename?
    local head = 0
    local gap = 0
@@ -145,3 +146,10 @@ function text_make()
       length        = function() return length end,
    }
 end
+
+return {
+   nowhere = nowhere,
+   backward = backward,
+   forward = forward,
+   make = make,
+}
