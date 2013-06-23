@@ -32,10 +32,45 @@ local function insert(ch)
    buffer.replace(buffer.length(), 0, ch)
 end
 
-local function redisplay()
-   io.write(term.home)
-   local fixed = buffer.get(0, buffer.length()):gsub('\n', '\r\n')
-   io.write(fixed)
+local function render(ch, x)
+   local b = string.byte(ch)
+   if b < 32 or 126 < b then
+      return string.format('\\%o', b)
+   else
+      return ch
+   end
+end
+
+local function redisplay(text, start, point)
+   io.write(term.hide_cursor .. term.home)
+   local p, x, y = start, 0, 0
+   local found_point = false
+   while y < screen_rows do
+      if p == point then
+         found_point = true
+         io.write(term.save_cursor_pos)
+      end
+      local ch = buffer.get(p, 1)
+      p = p + 1
+      if ch == '' or ch == '\n' then
+         x, y = 0, y+1
+         if y < screen_rows then io.write(term.clear_to_eol .. '\r\n') end
+      else
+         local glyphs = render(ch, x)
+         for i = 1, #glyphs do
+            io.write(glyphs:sub(i, i))
+            x = x + 1
+            if x == screen_cols then
+               x, y = 0, y+1    -- XXX assumes wraparound
+               if y == screen_rows then break end
+            end
+         end
+      end
+   end
+   if found_point then
+      io.write(term.show_cursor .. term.restore_cursor_pos)
+   end
+   return found_point
 end
 
 local function read_key()
@@ -59,7 +94,7 @@ keybindings['\r'] = function() insert('\n') end
 local function reacting()
    io.write(term.clear_screen)
    while true do
-      redisplay()
+      redisplay(buffer, 0, buffer.length())
       ch = read_key()
       if ch == nil or keybindings[ch] == 'exit' then break end
       (keybindings[ch] or insert)(ch)
