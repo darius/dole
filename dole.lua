@@ -26,18 +26,6 @@ local function with_stty(args, thunk)
    end)
 end
 
-local function read_key()
-   return io.read(1)
-end
-
-local function ctrl(ch)
-   return string.char(ch:byte(1) - 64)
-end
-
-local function meta(ch)
-   return '\27' .. ch
-end
-
 local buffer = text_module.make()
 
 local function insert(ch)
@@ -50,14 +38,31 @@ local function redisplay()
    io.write(fixed)
 end
 
+local function read_key()
+   return io.read(1)
+end
+
+local function ctrl(ch)
+   return string.char(ch:byte(1) - 64)
+end
+
+local function meta(ch)
+   return '\27' .. ch
+end
+
+local keybindings = {}
+
+keybindings[ctrl('Q')] = 'exit'
+
+keybindings['\r'] = function() insert('\n') end
+
 local function reacting()
    io.write(term.clear_screen)
    while true do
       redisplay()
       ch = read_key()
-      if ch == '' or ch == ctrl('Q') then break end
-      if ch == '\r' then ch = '\n' end
-      insert(ch)
+      if ch == nil or keybindings[ch] == 'exit' then break end
+      (keybindings[ch] or insert)(ch)
    end
 end
 
