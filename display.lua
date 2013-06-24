@@ -6,7 +6,7 @@ local rows, cols = 0+stty_rows, 0+stty_cols
 local function render(ch, x)
    local b = string.byte(ch)
    if b < 32 or 126 < b then
-      return string.format('\\%o', b)  -- XXX exactly 3 digits
+      return string.format('\\%03o', b)
    else
       return ch
    end
