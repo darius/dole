@@ -31,10 +31,15 @@
 -- TODO: for space efficiency the array ought to hold strings of up to
 -- say 64 bytes, instead of single characters. Or does Lua have some
 -- byte-array type?
+-- TODO: statistically predict whether the next insertion will be
+-- to the left or the right of the current one, and place the current
+-- one on the opposite side of the gap, to reduce copying.
 
 local nowhere = -1
 
 local backward, forward = -1, 1
+
+local dbg, loud = false, false
 
 -- Make a text object
 local function make() 
@@ -42,6 +47,47 @@ local function make()
    local head = 0
    local gap = 0
    local length = 0
+
+   local ideal = ''
+
+   local function contents()
+      local result = ''
+      for i = 1, head do
+         result = result .. t[i]
+      end
+      for i = head+1, length do
+         result = result .. t[gap+i]
+      end
+      return result
+   end
+
+   local function self_check()
+      if dbg then
+         assert(0 <= head)
+         assert(0 <= gap)
+         assert(head <= length)
+         if loud then
+            print('check')
+            print(contents())
+            print(ideal)
+            assert(ideal == contents())
+         end
+      end
+   end
+
+   local function dump(caption)
+      if loud then
+         if caption then
+            io.stderr:write(caption, ' / ')
+         end
+         io.stderr:write('#t: [')
+         for i = 1, #t do
+            io.stderr:write(' ', string.byte(t[i]))
+         end
+         io.stderr:write('] head:', head, ' gap:', gap, ' length:', length)
+         io.stderr:write('\n')
+      end
+   end
 
    local function clip(p)
       return math.max(0, math.min(p, length))
@@ -82,6 +128,9 @@ local function make()
    -- Return the `span` characters after `p` as a string.
    local function get(p, span)
       p, span = clip_range(p, span)
+      self_check()
+      --dump('get '..p..', '..span)
+      local expected = ideal:sub(p+1, p+span)
 
       local result = ''
       while p < head and #result < span do
@@ -92,16 +141,24 @@ local function make()
          p = p + 1
          result = result .. t[gap+p]
       end
+
+      assert(result == expected)
       return result
    end
 
    local function memmove(dst, src, len)
       if dst <= src then
          for i = 0, len-1 do
+            if loud then
+               print('t[', dst+i, '] = [', src+i, '] ', t[src+i])
+            end
             t[dst+i] = t[src+i]
          end
       else
          for i = len-1, 0, -1 do
+            if loud then
+               print('t[', dst+i, '] = [', src+i, '] ', t[src+i])
+            end
             t[dst+i] = t[src+i]
          end
       end
@@ -110,18 +167,27 @@ local function make()
    -- Replace the `span` characters after `p` by `replacement`.
    local function replace(p, span, replacement)
       p, span = clip_range(p, span)
+      dump()
+      self_check()
+      local new_ideal = ideal:sub(1, p) .. replacement .. ideal:sub(p+span+1)
 
       -- Make position p start the tail:
       if p <= head then
          memmove(gap + p+1, p+1, head - p)
       else
-         memmove(head+1, head + gap, p - head)
+         memmove(head+1, gap + head+1, p - head)
       end
       head = p
+      dump()
+      self_check()
 
       -- Delete the next `span` characters:
       gap = gap + span
       length = length - span
+
+      ideal = ideal:sub(1, p) .. ideal:sub(p+span+1)
+      dump()
+      self_check()
 
       -- Grow the array so `replacement` fits in the gap:
       if gap < #replacement then
@@ -130,26 +196,35 @@ local function make()
          memmove(size - tail + 1, head + gap + 1, tail)
          gap = size - length
       end
+      dump()
+      self_check()
 
       -- Insert `replacement`:
       for i = 1, #replacement do
+         --dump('replace '..i..' '..string.byte(replacement:sub(i, i)))
          t[head+i] = replacement:sub(i, i)
       end
       head = head + #replacement
+      gap = gap - #replacement
       length = length + #replacement
+
+      ideal = new_ideal
+      dump()
+      self_check()
    end
 
    return {
+      clip          = clip,
       find_char_set = find_char_set,
       get           = get,
-      replace       = replace,
       length        = function() return length end,
+      replace       = replace,
    }
 end
 
 return {
-   nowhere = nowhere,
    backward = backward,
-   forward = forward,
-   make = make,
+   forward  = forward,
+   make     = make,
+   nowhere  = nowhere,
 }
