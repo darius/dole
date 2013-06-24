@@ -1,6 +1,8 @@
--- A buffer is a text with a current point of editing.
+-- A buffer is a text with a current point of editing, a display, and
+-- a keymap.
 
 local display_m = require 'display'
+local keymap_m  = require 'keymap'
 local text_m    = require 'text'
 
 -- Return a new buffer.
@@ -34,6 +36,7 @@ local function make()
       backward_delete_char = backward_delete_char,
       forward_delete_char  = forward_delete_char,
       insert               = insert,
+      keymap               = keymap_m.make(insert),
       move_char            = move_char,
       redisplay            = redisplay,
    }
