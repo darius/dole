@@ -3,6 +3,7 @@
 -- ugh to _m name
 local buffer_m = require 'buffer'
 local key_m    = require 'key'
+local keymap_m = require 'keymap'
 local term_m   = require 'ansi_term'
 
 local function unwind_protect(thunk, on_unwind)
@@ -29,35 +30,25 @@ end
 
 local buffer = buffer_m.make()
 
-local function insert(ch)
-   buffer.insert(ch)
-end
+local keymap = keymap_m.make(buffer.insert)
+local C = keymap_m.ctrl
 
-local function ctrl(ch)
-   return string.char(ch:byte(1) - 64)
-end
+keymap.bind(C('B'),      function() buffer.move_char(-1) end)
+keymap.bind(C('F'),      function() buffer.move_char(1) end)
+keymap.bind(C('Q'),      'exit')
 
-local function meta(ch)
-   return '\27' .. ch
-end
-
-local keybindings = {}
-
-keybindings[ctrl('B')] = function() buffer.move_char(-1) end
-keybindings[ctrl('F')] = function() buffer.move_char(1) end
-keybindings[ctrl('Q')] = 'exit'
-
-keybindings['\r'] = function() insert('\n') end
-keybindings[string.char(127)] = buffer.backward_delete_char
-keybindings['del'] = buffer.forward_delete_char
+keymap.bind('\r',        function() buffer.insert('\n') end)
+keymap.bind('backspace', buffer.backward_delete_char)
+keymap.bind('del',       buffer.forward_delete_char)
 
 local function reacting()
    io.write(term_m.clear_screen)
    while true do
       buffer.redisplay()
       local ch = key_m.read_key()
-      if ch == nil or keybindings[ch] == 'exit' then break end
-      (keybindings[ch] or insert)(ch)
+      local command = keymap.get(ch)
+      if command == 'exit' then break end
+      command(ch)
    end
 end
 
