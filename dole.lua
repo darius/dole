@@ -5,28 +5,7 @@ local buffer_m = require 'buffer'
 local key_m    = require 'key'
 local keymap_m = require 'keymap'
 local term_m   = require 'ansi_term'
-
-local function unwind_protect(thunk, on_unwind)
-   local ok, result = pcall(thunk)
-   on_unwind()
-   if ok then
-      return result -- N.B. this leaves out any extra results from thunk
-   else
-      -- XXX *weird* without the following line it seems to fail silently
-      -- (that is, not show the error we just caught -- it seems the output
-      -- to stderr gets cleared away or the buffer isn't flushed or who knows). 
-      print('') 
-      error(result)
-   end
-end
-
-local function with_stty(args, thunk)
-   local settings = io.popen('stty -g'):read()
-   os.execute('stty ' .. args)
-   unwind_protect(thunk, function()
-                     os.execute('stty ' .. settings)  -- XXX this stopped happening on error?
-   end)
-end
+local stty_m   = require 'stty'
 
 local buffer = buffer_m.make()
 
@@ -53,7 +32,7 @@ local function reacting()
 end
 
 function main()
-   with_stty('raw -echo', reacting)
+   stty_m.with_stty('raw -echo', reacting)
    io.write('\n')
 end
 
