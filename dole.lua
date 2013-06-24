@@ -1,7 +1,7 @@
 -- ugh to _m name
-local buffer_m = require('buffer')
+local buffer_m = require 'buffer'
 local key_m    = require 'key'
-local term_m   = require('ansi_term')
+local term_m   = require 'ansi_term'
 
 local function unwind_protect(thunk, on_unwind)
    local ok, result = pcall(thunk)

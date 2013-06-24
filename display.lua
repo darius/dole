@@ -1,4 +1,4 @@
-local term = require('ansi_term')
+local term = require 'ansi_term'
 
 local stty_rows, stty_cols = io.popen('stty size'):read():match('(%d+) (%d+)')
 local rows, cols = 0+stty_rows, 0+stty_cols

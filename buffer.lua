@@ -1,5 +1,5 @@
-local display_m = require('display')
-local text_m    = require('text')
+local display_m = require 'display'
+local text_m    = require 'text'
 
 local function make()
    local text = text_m.make()
