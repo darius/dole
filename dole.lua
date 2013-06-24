@@ -1,5 +1,7 @@
-local term = require('ansi_term')
-local text_module = require('text')  -- ugh to this name
+-- ugh to _m name
+local term_m    = require('ansi_term')
+local display_m = require('display')
+local text_m    = require('text')
 
 local function unwind_protect(thunk, on_unwind)
    local ok, result = pcall(thunk)
@@ -15,9 +17,6 @@ local function unwind_protect(thunk, on_unwind)
    end
 end
 
-local rows, cols = io.popen('stty size'):read():match('(%d+) (%d+)')
-local screen_rows, screen_cols = 0+rows, 0+cols
-
 local function with_stty(args, thunk)
    local settings = io.popen('stty -g'):read()
    os.execute('stty ' .. args)
@@ -26,57 +25,16 @@ local function with_stty(args, thunk)
    end)
 end
 
-local function render(ch, x)
-   local b = string.byte(ch)
-   if b < 32 or 126 < b then
-      return string.format('\\%o', b)
-   else
-      return ch
-   end
-end
-
-local function redisplay(text, start, point)
-   io.write(term.hide_cursor .. term.home)
-   local p, x, y = start, 0, 0
-   local found_point = false
-   while y < screen_rows do
-      if p == point then
-         found_point = true
-         io.write(term.save_cursor_pos)
-      end
-      local ch = text.get(p, 1)
-      p = p + 1
-      if ch == '' or ch == '\n' then
-         x, y = 0, y+1
-         if y < screen_rows then io.write(term.clear_to_eol .. '\r\n') end
-      else
-         local glyphs = render(ch, x)
-         for i = 1, #glyphs do
-            io.write(glyphs:sub(i, i))
-            x = x + 1
-            if x == screen_cols then
-               x, y = 0, y+1    -- XXX assumes wraparound
-               if y == screen_rows then break end
-            end
-         end
-      end
-   end
-   if found_point then
-      io.write(term.show_cursor .. term.restore_cursor_pos)
-   end
-   return found_point
-end
-
 local function read_key()
    return io.read(1)
 end
 
 local function buffer_make()
-   local text = text_module.make()
+   local text = text_m.make()
    local point = 0              -- TODO: make this a mark
 
    local function redisplay_me()
-      redisplay(text, 0, point)
+      display_m.redisplay(text, 0, point)
    end
 
    local function insert(ch)
@@ -125,7 +83,7 @@ keybindings['\r'] = function() insert('\n') end
 keybindings[string.char(127)] = buffer.backward_delete_char
 
 local function reacting()
-   io.write(term.clear_screen)
+   io.write(term_m.clear_screen)
    while true do
       buffer.redisplay()
       ch = read_key()
