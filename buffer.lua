@@ -25,9 +25,9 @@ local function make()
 
    return {
       backward_delete_char = backward_delete_char,
-      insert = insert,
-      move_char = move_char,
-      redisplay = redisplay_me,
+      insert               = insert,
+      move_char            = move_char,
+      redisplay            = redisplay_me,
    }
 end
 
