@@ -77,6 +77,11 @@ local function read_key()
    return io.read(1)
 end
 
+local function backward_delete_char()
+   local point = buffer.length() -- XXX
+   buffer.replace(point-1, 1, '')
+end
+
 local function ctrl(ch)
    return string.char(ch:byte(1) - 64)
 end
@@ -90,6 +95,7 @@ local keybindings = {}
 keybindings[ctrl('Q')] = 'exit'
 
 keybindings['\r'] = function() insert('\n') end
+keybindings[string.char(127)] = backward_delete_char
 
 local function reacting()
    io.write(term.clear_screen)
