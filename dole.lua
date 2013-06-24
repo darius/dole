@@ -1,5 +1,6 @@
 -- ugh to _m name
 local buffer_m = require('buffer')
+local key_m    = require 'key'
 local term_m   = require('ansi_term')
 
 local function unwind_protect(thunk, on_unwind)
@@ -22,24 +23,6 @@ local function with_stty(args, thunk)
    unwind_protect(thunk, function()
                      os.execute('stty ' .. settings)  -- XXX this stopped happening on error?
    end)
-end
-
-local fancy_keys = {['\27[3~'] = 'del'}
-local key_prefixes = {}
-for key, name in pairs(fancy_keys) do
-   for i = 1, #key-1 do
-      key_prefixes[string.sub(key, 1, i)] = true
-   end
-end
-
-local function read_key()
-   local key = io.read(1)
-   while key_prefixes[key] do
-      local k1 = io.read(1)
-      if k1 == '' then break end
-      key = key .. k1
-   end
-   return fancy_keys[key] or key
 end
 
 local buffer = buffer_m.make()
@@ -70,7 +53,7 @@ local function reacting()
    io.write(term_m.clear_screen)
    while true do
       buffer.redisplay()
-      ch = read_key()
+      local ch = key_m.read_key()
       if ch == nil or keybindings[ch] == 'exit' then break end
       (keybindings[ch] or insert)(ch)
    end
