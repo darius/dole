@@ -24,8 +24,22 @@ local function with_stty(args, thunk)
    end)
 end
 
+local fancy_keys = {['\27[3~'] = 'del'}
+local key_prefixes = {}
+for key, name in pairs(fancy_keys) do
+   for i = 1, #key-1 do
+      key_prefixes[string.sub(key, 1, i)] = true
+   end
+end
+
 local function read_key()
-   return io.read(1)
+   local key = io.read(1)
+   while key_prefixes[key] do
+      local k1 = io.read(1)
+      if k1 == '' then break end
+      key = key .. k1
+   end
+   return fancy_keys[key] or key
 end
 
 local buffer = buffer_m.make()
@@ -50,6 +64,7 @@ keybindings[ctrl('Q')] = 'exit'
 
 keybindings['\r'] = function() insert('\n') end
 keybindings[string.char(127)] = buffer.backward_delete_char
+keybindings['del'] = buffer.forward_delete_char
 
 local function reacting()
    io.write(term_m.clear_screen)

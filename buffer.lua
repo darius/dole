@@ -5,7 +5,7 @@ local function make()
    local text = text_m.make()
    local point = 0              -- TODO: make this a mark
 
-   local function redisplay_me()
+   local function redisplay()
       display_m.redisplay(text, 0, point)
    end
 
@@ -23,11 +23,16 @@ local function make()
       move_char(-1)
    end
 
+   local function forward_delete_char()
+      text.replace(point, 1, '')
+   end
+
    return {
       backward_delete_char = backward_delete_char,
+      forward_delete_char  = forward_delete_char,
       insert               = insert,
       move_char            = move_char,
-      redisplay            = redisplay_me,
+      redisplay            = redisplay,
    }
 end
 
