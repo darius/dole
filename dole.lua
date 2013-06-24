@@ -22,7 +22,7 @@ local function with_stty(args, thunk)
    local settings = io.popen('stty -g'):read()
    os.execute('stty ' .. args)
    unwind_protect(thunk, function()
-                     os.execute('stty ' .. settings)
+                     os.execute('stty ' .. settings)  -- XXX this stopped happening on error?
    end)
 end
 
@@ -84,14 +84,19 @@ local function buffer_make()
       point = point + #ch
    end
 
+   local function move_char(offset)
+      point = text.clip(point + offset)
+   end
+
    local function backward_delete_char()
       text.replace(point-1, 1, '')
-      point = math.max(0, point-1)
+      move_char(-1)
    end
 
    return {
       backward_delete_char = backward_delete_char,
       insert = insert,
+      move_char = move_char,
       redisplay = redisplay_me,
    }
 end
@@ -112,6 +117,8 @@ end
 
 local keybindings = {}
 
+keybindings[ctrl('B')] = function() buffer.move_char(-1) end
+keybindings[ctrl('F')] = function() buffer.move_char(1) end
 keybindings[ctrl('Q')] = 'exit'
 
 keybindings['\r'] = function() insert('\n') end
