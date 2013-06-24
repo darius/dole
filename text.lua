@@ -1,5 +1,5 @@
 -- Glossary:
---   p   coordinate (position between characters in text)
+--   p   coordinate (position between characters in text, or `nowhere`)
 --   dir direction
 --   cs  charset
 
@@ -35,13 +35,15 @@
 -- to the left or the right of the current one, and place the current
 -- one on the opposite side of the gap, to reduce copying.
 
+-- A coordinate that's never an actual text position.
 local nowhere = -1
 
+-- Directions from a coordinate.
 local backward, forward = -1, 1
 
 local dbg, loud = false, false
 
--- Make a text object
+-- Make a text object.
 local function make() 
    local t = {}   -- The storage for the head, gap, and tail. TODO rename?
    local head = 0
@@ -89,6 +91,7 @@ local function make()
       end
    end
 
+   -- Return coordinate p clipped to the text's actual range.
    local function clip(p)
       return math.max(0, math.min(p, length))
    end

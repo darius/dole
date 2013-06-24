@@ -1,6 +1,9 @@
+-- A buffer is a text with a current point of editing.
+
 local display_m = require 'display'
 local text_m    = require 'text'
 
+-- Return a new buffer.
 local function make()
    local text = text_m.make()
    local point = 0              -- TODO: make this a mark

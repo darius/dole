@@ -1,3 +1,5 @@
+-- Update what's shown on the screen.
+
 local term = require 'ansi_term'
 
 local stty_rows, stty_cols = io.popen('stty size'):read():match('(%d+) (%d+)')
@@ -12,6 +14,8 @@ local function render(ch, x)
    end
 end
 
+-- Update the screen to show `text` from coordinate `start` with
+-- cursor at `point`. Return true iff point turns out to be visible.
 local function redisplay(text, start, point)
    io.write(term.hide_cursor .. term.home)
    local p, x, y = start, 0, 0

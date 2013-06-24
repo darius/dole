@@ -1,3 +1,5 @@
+-- Main program
+
 -- ugh to _m name
 local buffer_m = require 'buffer'
 local key_m    = require 'key'
