@@ -26,12 +26,6 @@ local function with_stty(args, thunk)
    end)
 end
 
-local buffer = text_module.make()
-
-local function insert(ch)
-   buffer.replace(buffer.length(), 0, ch)
-end
-
 local function render(ch, x)
    local b = string.byte(ch)
    if b < 32 or 126 < b then
@@ -50,7 +44,7 @@ local function redisplay(text, start, point)
          found_point = true
          io.write(term.save_cursor_pos)
       end
-      local ch = buffer.get(p, 1)
+      local ch = text.get(p, 1)
       p = p + 1
       if ch == '' or ch == '\n' then
          x, y = 0, y+1
@@ -77,9 +71,35 @@ local function read_key()
    return io.read(1)
 end
 
-local function backward_delete_char()
-   local point = buffer.length() -- XXX
-   buffer.replace(point-1, 1, '')
+local function buffer_make()
+   local text = text_module.make()
+   local point = 0              -- TODO: make this a mark
+
+   local function redisplay_me()
+      redisplay(text, 0, point)
+   end
+
+   local function insert(ch)
+      text.replace(point, 0, ch)
+      point = point + #ch
+   end
+
+   local function backward_delete_char()
+      text.replace(point-1, 1, '')
+      point = math.max(0, point-1)
+   end
+
+   return {
+      backward_delete_char = backward_delete_char,
+      insert = insert,
+      redisplay = redisplay_me,
+   }
+end
+
+local buffer = buffer_make()
+
+local function insert(ch)
+   buffer.insert(ch)
 end
 
 local function ctrl(ch)
@@ -95,12 +115,12 @@ local keybindings = {}
 keybindings[ctrl('Q')] = 'exit'
 
 keybindings['\r'] = function() insert('\n') end
-keybindings[string.char(127)] = backward_delete_char
+keybindings[string.char(127)] = buffer.backward_delete_char
 
 local function reacting()
    io.write(term.clear_screen)
    while true do
-      redisplay(buffer, 0, buffer.length())
+      buffer.redisplay()
       ch = read_key()
       if ch == nil or keybindings[ch] == 'exit' then break end
       (keybindings[ch] or insert)(ch)
