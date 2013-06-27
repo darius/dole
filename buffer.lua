@@ -15,7 +15,7 @@ local function make()
    end
 
    local function insert(ch)
-      text.replace(point, 0, ch)
+      text.insert(point, ch)
       point = point + #ch
    end
 
@@ -24,12 +24,12 @@ local function make()
    end
 
    local function backward_delete_char()
-      text.replace(point-1, 1, '')
+      text.delete(point-1, 1)
       move_char(-1)
    end
 
    local function forward_delete_char()
-      text.replace(point, 1, '')
+      text.delete(point, 1)
    end
 
    return {

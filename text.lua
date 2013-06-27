@@ -216,10 +216,20 @@ local function make()
       self_check()
    end
 
+   local function delete(p, span)
+      replace(p, span, '')
+   end
+
+   local function insert(p, insertion)
+      replace(p, 0, insertion)
+   end
+
    return {
       clip          = clip,
+      delete        = delete,
       find_char_set = find_char_set,
       get           = get,
+      insert        = insert,
       length        = function() return length end,
       replace       = replace,
    }
