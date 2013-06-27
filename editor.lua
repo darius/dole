@@ -15,8 +15,9 @@ local function edit(buffer)
    end
 end
 
-local function dole()
+local function dole(filename_opt)
    local buffer = fundamental_mode.make()
+   if filename_opt then buffer.visit(filename_opt) end
    stty_m.with_stty('raw -echo', function() edit(buffer) end)
    io.write('\n')
 end

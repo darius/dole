@@ -10,6 +10,22 @@ local function make()
    local text = text_m.make()
    local point = 0              -- TODO: make this a mark
 
+   local function clear()
+      text = text_m.make()
+      point = 0
+   end
+
+   local function visit(filename)
+      -- XXX deal with error gracefully
+      local file, openerr = io.open(filename, 'r')
+      if file == nil then error(openerr) end
+      local contents, readerr = file:read('*a')
+      if contents == nil then error(readerr) end
+      file:close() -- XXX check for error
+      clear()
+      text.insert(0, contents)
+   end
+
    local function redisplay()
       display_m.redisplay(text, 0, point)
    end
@@ -39,6 +55,7 @@ local function make()
       keymap               = keymap_m.make(insert),
       move_char            = move_char,
       redisplay            = redisplay,
+      visit                = visit,
    }
 end
 
