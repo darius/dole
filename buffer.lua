@@ -9,6 +9,7 @@ local text_m    = require 'text'
 local function make()
    local text = text_m.make()
    local point = 0              -- TODO: make this a mark
+   local origin = 0  -- display origin. XXX keep in a window object?
 
    local function clear()
       text = text_m.make()
@@ -27,7 +28,15 @@ local function make()
    end
 
    local function redisplay()
-      display_m.redisplay(text, 0, point)
+      if not display_m.redisplay(text, origin, point) then
+         local screen_size = display_m.rows * display_m.cols
+         for o = math.max(0, point - screen_size), point do
+            if display_m.redisplay(text, o, point) then
+               origin = o
+               break
+            end
+         end
+      end
    end
 
    local function insert(ch)

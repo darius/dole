@@ -29,7 +29,8 @@ local function redisplay(text, start, point)
       p = p + 1
       if ch == '' or ch == '\n' then
          x, y = 0, y+1
-         if y < rows then io.write(term.clear_to_eol .. '\r\n') end
+         io.write(term.clear_to_eol)
+         if y < rows then io.write('\r\n') end
       else
          local glyphs = render(ch, x)
          for i = 1, #glyphs do
