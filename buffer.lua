@@ -32,7 +32,7 @@ local function make()
       function no_op() end
       if not display_m.redisplay(text, origin, point, no_op) then
          local screen_size = display_m.rows * display_m.cols
-         for o = math.max(0, point - screen_size), point do
+         for o = text.clip(point - screen_size), point do
             if display_m.redisplay(text, o, point, no_op) then
                origin = o
                break
