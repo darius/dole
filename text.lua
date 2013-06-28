@@ -101,27 +101,27 @@ local function make()
       return q, clip(p + math.max(0, span)) - q
    end
 
-   -- Return the position before the instance of `cs` closest to `p`
+   -- Return the position after the instance of `cs` closest to `p`
    -- in direction `d`. (If there's none, return `nowhere`.)
    local function find_char_set(p, dir, cs)
       p = clip(p)
       if dir == forward then
          while p < head do
-            if cs.has(t[p+1]) then return p end
+            if cs.has(t[p+1]) then return p+1 end
             p = p + 1
          end
          while p < length do
-            if cs.has(t[gap+p+1]) then return p end
+            if cs.has(t[gap+p+1]) then return p+1 end
             p = p + 1
          end
       else
          assert(dir == backward)
          while head < p do
-            if cs.has(t[gap+p]) then return p-1 end
+            if cs.has(t[gap+p]) then return p end
             p = p - 1
          end
          while 0 < p do
-            if cs.has(t[p]) then return p-1 end
+            if cs.has(t[p]) then return p end
             p = p - 1
          end
       end

@@ -1,6 +1,7 @@
 -- A buffer is a text with a current point of editing, a display, and
 -- a keymap.
 
+local charset_m = require 'charset'
 local display_m = require 'display'
 local keymap_m  = require 'keymap'
 local text_m    = require 'text'
@@ -57,12 +58,38 @@ local function make()
       text.delete(point, 1)
    end
 
+   local newline = charset_m.singleton('\n')
+
+   local function find_line(p, dir)
+      return text.clip(text.find_char_set(p, dir, newline))
+   end
+
+   -- TODO: preserve goal column; respect formatting, such as tabs;
+   -- treat long lines as defined by display
+   local function previous_line()
+      local start = find_line(point, -1)
+      local offset = point - start
+      local prev_start = find_line(start-1, -1)
+      point = math.min(prev_start + offset, text.clip(start-1))
+   end
+
+   local function next_line()
+      local start = find_line(point, -1)
+      local offset = point - start
+      local next_start = find_line(start, 1)
+      local next_end = find_line(next_start, 1)
+      point = math.min(next_start + offset, text.clip(next_end-1))
+      -- XXX this can wrap around since text.clip moves `nowhere` to 0.
+   end
+
    return {
       backward_delete_char = backward_delete_char,
       forward_delete_char  = forward_delete_char,
       insert               = insert,
       keymap               = keymap_m.make(insert),
       move_char            = move_char,
+      next_line            = next_line,
+      previous_line        = previous_line,
       redisplay            = redisplay,
       visit                = visit,
    }
