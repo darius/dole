@@ -36,8 +36,8 @@ local function make()
       if ok(lo) then return lo end
       local L, H = lo, hi
       while L+1 < H do
-         -- Inv: (not ok(j)) for j in [L..i) for some i
-         --  and      ok(j)  for j in [i..H).
+         -- Inv: (not ok(j)) for j in [L..i) for some i, L<i<=H
+         --  and      ok(j)  for j in [i..H].
          local mid = math.floor((L + H) / 2)
          if ok(mid) then
             assert(mid < H)
