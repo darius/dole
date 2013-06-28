@@ -28,16 +28,36 @@ local function make()
       text.insert(0, contents)
    end
 
+   -- Return the smallest i in [lo..hi) where ok(i).
+   -- Pre: lo and hi are ints, lo < hi
+   -- and not ok(j) for j in [lo..i)
+   -- and     ok(j) for j in [i..hi)  (for some i).
+   local function search(lo, hi, ok)
+      if ok(lo) then return lo end
+      local L, H = lo, hi
+      while L+1 < H do
+         -- Inv: (not ok(j)) for j in [L..i) for some i
+         --  and      ok(j)  for j in [i..H).
+         local mid = math.floor((L + H) / 2)
+         if ok(mid) then
+            assert(mid < H)
+            H = mid
+         else
+            assert(L < mid)
+            L = mid
+         end
+      end
+      return H
+   end
+
    local function redisplay()
       function no_op() end
       if not display_m.redisplay(text, origin, point, no_op) then
-         local screen_size = display_m.rows * display_m.cols
-         for o = text.clip(point - screen_size), point do
-            if display_m.redisplay(text, o, point, no_op) then
-               origin = o
-               break
-            end
+         local function has_point(o)
+            return display_m.redisplay(text, o, point, no_op)
          end
+         local screen_size = display_m.rows * display_m.cols
+         origin = search(text.clip(point - screen_size), point, has_point)
       end
       display_m.redisplay(text, origin, point, io.write)
    end
@@ -52,7 +72,7 @@ local function make()
    end
 
    local function backward_delete_char()
-      text.delete(point-1, 1)
+      text.delete(point - 1, 1)
       move_char(-1)
    end
 
