@@ -107,21 +107,21 @@ local function make()
       p = clip(p)
       if dir == forward then
          while p < head do
-            if char_set_has(cs, t[p+1]) then return p end
+            if cs.has(t[p+1]) then return p end
             p = p + 1
          end
          while p < length do
-            if char_set_has(cs, t[gap+p+1]) then return p end
+            if cs.has(t[gap+p+1]) then return p end
             p = p + 1
          end
       else
          assert(dir == backward)
          while head < p do
-            if char_set_has(cs, t[gap+p]) then return p-1 end
+            if cs.has(t[gap+p]) then return p-1 end
             p = p - 1
          end
          while 0 < p do
-            if char_set_has(cs, t[p]) then return p-1 end
+            if cs.has(t[p]) then return p-1 end
             p = p - 1
          end
       end
