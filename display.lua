@@ -16,25 +16,25 @@ end
 
 -- Update the screen to show `text` from coordinate `start` with
 -- cursor at `point`. Return true iff point turns out to be visible.
-local function redisplay(text, start, point)
-   io.write(term.hide_cursor .. term.home)
+local function redisplay(text, start, point, write)
+   write(term.hide_cursor .. term.home)
    local p, x, y = start, 0, 0
    local found_point = false
    while y < rows do
       if p == point then
          found_point = true
-         io.write(term.save_cursor_pos)
+         write(term.save_cursor_pos)
       end
       local ch = text.get(p, 1)
       p = p + 1
       if ch == '' or ch == '\n' then
          x, y = 0, y+1
-         io.write(term.clear_to_eol)
-         if y < rows then io.write('\r\n') end
+         write(term.clear_to_eol)
+         if y < rows then write('\r\n') end
       else
          local glyphs = render(ch, x)
          for i = 1, #glyphs do
-            io.write(glyphs:sub(i, i))
+            write(glyphs:sub(i, i))
             x = x + 1
             if x == cols then
                x, y = 0, y+1    -- XXX assumes wraparound
@@ -44,7 +44,7 @@ local function redisplay(text, start, point)
       end
    end
    if found_point then
-      io.write(term.show_cursor .. term.restore_cursor_pos)
+      write(term.show_cursor .. term.restore_cursor_pos)
    end
    return found_point
 end

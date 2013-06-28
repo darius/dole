@@ -29,15 +29,17 @@ local function make()
    end
 
    local function redisplay()
-      if not display_m.redisplay(text, origin, point) then
+      function no_op() end
+      if not display_m.redisplay(text, origin, point, no_op) then
          local screen_size = display_m.rows * display_m.cols
          for o = math.max(0, point - screen_size), point do
-            if display_m.redisplay(text, o, point) then
+            if display_m.redisplay(text, o, point, no_op) then
                origin = o
                break
             end
          end
       end
+      display_m.redisplay(text, origin, point, io.write)
    end
 
    local function insert(ch)
