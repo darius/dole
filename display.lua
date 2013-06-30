@@ -2,9 +2,11 @@
 
 local term = require 'ansi_term'
 
+-- The screen size.
 local stty_rows, stty_cols = io.popen('stty size'):read():match('(%d+) (%d+)')
 local rows, cols = 0+stty_rows, 0+stty_cols
 
+-- Return a string of glyphs representing character ch at column x.
 local function render(ch, x)
    local b = string.byte(ch)
    if b < 32 or 126 < b then
