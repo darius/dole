@@ -6,6 +6,28 @@ local display_m = require 'display'
 local keymap_m  = require 'keymap'
 local text_m    = require 'text'
 
+-- Return the smallest i in [lo..hi) where ok(i).
+-- Pre: lo and hi are ints, lo < hi
+-- and not ok(j) for j in [lo..i)
+-- and     ok(j) for j in [i..hi)  (for some i).
+local function search(lo, hi, ok)
+   if ok(lo) then return lo end
+   local L, H = lo, hi
+   while L+1 < H do
+      -- Inv: (not ok(j)) for j in [L..i) for some i, L<i<=H
+      --  and      ok(j)  for j in [i..H].
+      local mid = math.floor((L + H) / 2)
+      if ok(mid) then
+         assert(mid < H)
+         H = mid
+      else
+         assert(L < mid)
+         L = mid
+      end
+   end
+   return H
+end
+
 -- Return a new buffer.
 local function make()
    local text = text_m.make()
@@ -26,28 +48,6 @@ local function make()
       file:close() -- XXX check for error
       clear()
       text.insert(0, contents)
-   end
-
-   -- Return the smallest i in [lo..hi) where ok(i).
-   -- Pre: lo and hi are ints, lo < hi
-   -- and not ok(j) for j in [lo..i)
-   -- and     ok(j) for j in [i..hi)  (for some i).
-   local function search(lo, hi, ok)
-      if ok(lo) then return lo end
-      local L, H = lo, hi
-      while L+1 < H do
-         -- Inv: (not ok(j)) for j in [L..i) for some i, L<i<=H
-         --  and      ok(j)  for j in [i..H].
-         local mid = math.floor((L + H) / 2)
-         if ok(mid) then
-            assert(mid < H)
-            H = mid
-         else
-            assert(L < mid)
-            L = mid
-         end
-      end
-      return H
    end
 
    local function redisplay()
