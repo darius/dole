@@ -1,5 +1,6 @@
 -- A buffer is a text with a current point of editing, a display, and
 -- a keymap.
+-- TODO: prev/next page
 
 local charset_m = require 'charset'
 local display_m = require 'display'
