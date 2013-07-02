@@ -28,6 +28,8 @@ local function make()
    buffer.keymap.bind('\r',        function() buffer.insert('\n') end)
    buffer.keymap.bind('backspace', buffer.backward_delete_char)
    buffer.keymap.bind('del',       buffer.forward_delete_char)
+   buffer.keymap.bind('end',       buffer.end_of_line)
+   buffer.keymap.bind('home',      buffer.beginning_of_line)
    buffer.keymap.bind('pgup',      buffer.previous_page)
    buffer.keymap.bind('pgdn',      buffer.next_page)
       

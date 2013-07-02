@@ -90,6 +90,14 @@ local function make()
       return text.clip(text.find_char_set(p, dir, newline))
    end
 
+   local function beginning_of_line()
+      point = find_line(point, -1)
+   end
+
+   local function end_of_line()
+      point = text.clip(find_line(point, 1) - 1)
+   end
+
    -- TODO: preserve goal column; respect formatting, such as tabs;
    -- treat long lines as defined by display
    local function previous_line()
@@ -128,6 +136,8 @@ local function make()
 
    return {
       backward_delete_char = backward_delete_char,
+      beginning_of_line    = beginning_of_line,
+      end_of_line          = end_of_line,
       forward_delete_char  = forward_delete_char,
       insert               = insert,
       keymap               = keymap_m.make(insert),
