@@ -3,6 +3,8 @@
 local fancy_keys = {
    ['\127'] = 'backspace',
    ['\27[3~'] = 'del',
+   ['\27[5~'] = 'pgup',
+   ['\27[6~'] = 'pgdn',
 }
 local key_prefixes = {}
 for key, name in pairs(fancy_keys) do

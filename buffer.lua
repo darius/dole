@@ -1,6 +1,5 @@
 -- A buffer is a text with a current point of editing, a display, and
 -- a keymap.
--- TODO: prev/next page
 
 local charset_m = require 'charset'
 local display_m = require 'display'
@@ -51,7 +50,7 @@ local function make()
       text.insert(0, contents)
    end
 
-   local function redisplay()
+   local function update_origin()
       function no_op() end
       if not display_m.redisplay(text, origin, point, no_op) then
          local function has_point(o)
@@ -60,6 +59,10 @@ local function make()
          local screen_size = display_m.rows * display_m.cols
          origin = search(text.clip(point - screen_size), point, has_point)
       end
+   end
+
+   local function redisplay()
+      update_origin()
       display_m.redisplay(text, origin, point, io.write)
    end
 
@@ -105,6 +108,24 @@ local function make()
       -- XXX this can wrap around since text.clip moves `nowhere` to 0.
    end
 
+   -- TODO: more reasonable/emacsy behavior. This interacts quite badly
+   -- with the dumb update_origin() logic.
+   local function previous_page()
+      update_origin()
+      point = origin
+      for i = 1, display_m.rows do
+         previous_line()
+      end
+   end
+
+   local function next_page()
+      update_origin()
+      point = origin
+      for i = 1, display_m.rows do
+         next_line()
+      end
+   end
+
    return {
       backward_delete_char = backward_delete_char,
       forward_delete_char  = forward_delete_char,
@@ -113,6 +134,8 @@ local function make()
       move_char            = move_char,
       next_line            = next_line,
       previous_line        = previous_line,
+      next_page            = next_page,
+      previous_page        = previous_page,
       redisplay            = redisplay,
       visit                = visit,
    }
