@@ -111,16 +111,16 @@ local function make()
    -- TODO: more reasonable/emacsy behavior. This interacts quite badly
    -- with the dumb update_origin() logic.
    local function previous_page()
-      update_origin()
-      point = origin
+      -- update_origin()
+      -- point = origin
       for i = 1, display_m.rows do
          previous_line()
       end
    end
 
    local function next_page()
-      update_origin()
-      point = origin
+      -- update_origin()
+      -- point = origin
       for i = 1, display_m.rows do
          next_line()
       end
