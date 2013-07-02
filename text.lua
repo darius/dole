@@ -34,6 +34,8 @@
 -- TODO: statistically predict whether the next insertion will be
 -- to the left or the right of the current one, and place the current
 -- one on the opposite side of the gap, to reduce copying.
+-- TODO: we want a nowhere_before and a nowhere_after, such that 
+--  text.clip move to 0/length respectively
 
 -- A coordinate that's never an actual text position.
 local nowhere = -1
