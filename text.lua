@@ -74,8 +74,8 @@ local function make()
             print('check')
             print(contents())
             print(ideal)
-            assert(ideal == contents())
          end
+         assert(ideal == contents())
       end
    end
 
