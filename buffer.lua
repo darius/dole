@@ -52,9 +52,9 @@ local function make()
 
    local function update_origin()
       local rendering = display_m.render(text, origin, point)
-      if not rendering.cursor_is_visible then
+      if not rendering.point_is_visible then
          local function has_point(o)
-            return display_m.render(text, o, point).cursor_is_visible
+            return display_m.render(text, o, point).point_is_visible
          end
          local screen_size = display_m.rows * display_m.cols
          origin = search(text.clip(point - screen_size), point, has_point)

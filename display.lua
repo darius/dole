@@ -60,7 +60,7 @@ local function render(text, start, point)
       io.write(term.show_cursor .. term.goto(point_x, point_y))
    end
    return {
-      cursor_is_visible = (point_x ~= nil),
+      point_is_visible = (point_x ~= nil),
       show = show,
    }
 end
