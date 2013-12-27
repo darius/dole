@@ -58,12 +58,14 @@ local function make()
          end
          local screen_size = display_m.rows * display_m.cols
          origin = search(text.clip(point - screen_size), point, has_point)
+         rendering = display_m.render(text, origin, point)
       end
+      return rendering
    end
 
    local function redisplay()
-      update_origin()
-      display_m.render(text, origin, point).show()
+      local rendering = update_origin()
+      rendering.show()
    end
 
    local function insert(ch)
