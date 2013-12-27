@@ -6,8 +6,12 @@ local term = require 'ansi_term'
 local stty_rows, stty_cols = io.popen('stty size'):read():match('(%d+) (%d+)')
 local rows, cols = 0+stty_rows, 0+stty_cols
 
+-- Track what's on the screen, to avoid redundant writes. An array of strings,
+-- one per screen row.
+local showing = {}
+
 -- Return a string of glyphs representing character ch at column x.
-local function render(ch, x)
+local function render_glyph(ch, x)
    local b = string.byte(ch)
    if b < 32 or 126 < b then
       return string.format('\\%03o', b)
@@ -16,43 +20,53 @@ local function render(ch, x)
    end
 end
 
--- Update the screen to show `text` from coordinate `start` with
--- cursor at `point`. Return true iff point turns out to be visible.
-local function redisplay(text, start, point, write)
-   write(term.hide_cursor .. term.home)
+-- Compute how to show `text` from coordinate `start` with cursor at
+-- `point`. Return an object that can say whether the cursor is visible
+-- and can show the rendering.
+local function render(text, start, point)
    local p, x, y = start, 0, 0
-   local found_point = false
+   local lines = {''}
+   local point_x, point_y = nil, nil
    while y < rows do
       if p == point then
-         found_point = true
-         write(term.save_cursor_pos)
+         point_x, point_y = x, y
       end
       local ch = text.get(p, 1)
       p = p + 1
       if ch == '' or ch == '\n' then
          x, y = 0, y+1
-         write(term.clear_to_eol)
-         if y < rows then write('\r\n') end
+         if y < rows then table.insert(lines, '') end  -- XXX redundant test
       else
-         local glyphs = render(ch, x)
+         local glyphs = render_glyph(ch, x)
          for i = 1, #glyphs do
-            write(glyphs:sub(i, i))
+            lines[#lines] = lines[#lines] .. glyphs:sub(i, i)
             x = x + 1
             if x == cols then
-               x, y = 0, y+1    -- XXX assumes wraparound
+               x, y = 0, y+1
                if y == rows then break end
+               table.insert(lines, '')
             end
          end
       end
    end
-   if found_point then
-      write(term.show_cursor .. term.restore_cursor_pos)
+   local function show()
+      io.write(term.hide_cursor .. term.home)
+      for i = 1, #lines do
+         if lines[i] ~= showing[i] then
+            io.write(term.goto(0, i-1) .. lines[i] .. term.clear_to_eol)
+            showing[i] = lines[i]
+         end
+      end
+      io.write(term.show_cursor .. term.goto(point_x, point_y))
    end
-   return found_point
+   return {
+      cursor_is_visible = (point_x ~= nil),
+      show = show,
+   }
 end
 
 return {
-   cols      = cols,
-   redisplay = redisplay,
-   rows      = rows,
+   cols   = cols,
+   render = render,
+   rows   = rows,
 }

@@ -51,10 +51,10 @@ local function make()
    end
 
    local function update_origin()
-      function no_op() end
-      if not display_m.redisplay(text, origin, point, no_op) then
+      local rendering = display_m.render(text, origin, point)
+      if not rendering.cursor_is_visible then
          local function has_point(o)
-            return display_m.redisplay(text, o, point, no_op)
+            return display_m.render(text, o, point).cursor_is_visible
          end
          local screen_size = display_m.rows * display_m.cols
          origin = search(text.clip(point - screen_size), point, has_point)
@@ -63,7 +63,7 @@ local function make()
 
    local function redisplay()
       update_origin()
-      display_m.redisplay(text, origin, point, io.write)
+      display_m.render(text, origin, point).show()
    end
 
    local function insert(ch)
