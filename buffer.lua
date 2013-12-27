@@ -6,10 +6,10 @@ local display_m = require 'display'
 local keymap_m  = require 'keymap'
 local text_m    = require 'text'
 
--- Return the smallest i in [lo..hi) where ok(i).
+-- Return the smallest i in [lo..hi) where ok(i), if any; else hi.
 -- Pre: lo and hi are ints, lo < hi
 -- and not ok(j) for j in [lo..i)
--- and     ok(j) for j in [i..hi)  (for some i).
+-- and     ok(j) for j in [i..hi)  (for some i in [lo..hi]).
 local function search(lo, hi, ok)
    if ok(lo) then return lo end
    local L, H = lo, hi
@@ -54,17 +54,23 @@ local function make()
       local rendering = display_m.render(text, origin, point)
       if not rendering.point_is_visible then
          local function has_point(o)
-            return display_m.render(text, o, point).point_is_visible
+--            return display_m.render(text, o, point).point_is_visible
+            return display_m.render(text, o, point).point_is_centered
          end
          local screen_size = display_m.rows * display_m.cols
          origin = search(text.clip(point - screen_size), point, has_point)
          rendering = display_m.render(text, origin, point)
+         if origin == point then
+            origin = 0 -- Couldn't center it.
+            rendering = display_m.render(text, origin, point)
+         end
       end
       return rendering
    end
 
    local function redisplay()
       local rendering = update_origin()
+      assert(rendering.point_is_visible)
       rendering.show()
    end
 

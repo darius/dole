@@ -60,7 +60,9 @@ local function render(text, start, point)
       io.write(term.show_cursor .. term.goto(point_x, point_y))
    end
    return {
-      point_is_visible = (point_x ~= nil),
+      -- XXX doesn't mean 'is centered' any more:
+      point_is_centered = (point_y ~= nil and point_y <= math.floor(rows/2)),
+      point_is_visible = (point_y ~= nil),
       show = show,
    }
 end
