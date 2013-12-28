@@ -34,11 +34,10 @@
 -- TODO: statistically predict whether the next insertion will be
 -- to the left or the right of the current one, and place the current
 -- one on the opposite side of the gap, to reduce copying.
--- TODO: we want a nowhere_before and a nowhere_after, such that 
---  text.clip move to 0/length respectively
 
--- A coordinate that's never an actual text position.
-local nowhere = -1
+-- A coordinate that's never an actual text position. We'll use
+-- -nowhere for "off the left end" and +nowhere for the right.
+local nowhere = 2^51
 
 -- Directions from a coordinate.
 local backward, forward = -1, 1
@@ -104,7 +103,7 @@ local function make()
    end
 
    -- Return the position after the instance of `cs` closest to `p`
-   -- in direction `d`. (If there's none, return `nowhere`.)
+   -- in direction `d`. (If there's none, return `nowhere` or `-nowhere`.)
    local function find_char_set(p, dir, cs)
       p = clip(p)
       if dir == forward then
@@ -127,7 +126,7 @@ local function make()
             p = p - 1
          end
       end
-      return nowhere
+      return dir * nowhere
    end
 
    -- Return the `span` characters after `p` as a string.
