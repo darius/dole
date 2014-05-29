@@ -1,7 +1,4 @@
 -- ANSI terminal control
--- TODO: mine for ideas
---   https://gist.github.com/zii-prime/5507110 
---   https://github.com/thomasballinger/scottwasright
 
 local M = {}
 
