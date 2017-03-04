@@ -59,6 +59,7 @@ local function make()
          end
          local screen_size = display_m.rows * display_m.cols
          origin = search(text.clip(point - screen_size), point, has_point)
+         -- XXX the following could be simpler and faster, right?
          rendering = display_m.render(text, origin, point)
          if origin == point then
             origin = 0 -- Couldn't center it.
